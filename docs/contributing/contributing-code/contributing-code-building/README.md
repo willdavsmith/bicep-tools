@@ -6,6 +6,11 @@ This repository uses corepack and Yarn v4. Corepack is included with NodeJs and 
 
 - Install NodeJs 20+
 - Run `corepack enable`
+- Clone the repository with submodules
+  - `git submodule update --init --recursive`
+- Build the `bicep-types` module`
+  - `cd bicep-types/src/bicep-types`
+  - `npm ci && npm run build`
 
 ## Building
 
