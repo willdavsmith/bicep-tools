@@ -68,6 +68,7 @@ jobs:
         with:
           node-version: '20'
           scope: '@radius-project'
+          registry-url: "https://registry.npmjs.org"
       - name: Enable Corepack
         run: |
           corepack enable
