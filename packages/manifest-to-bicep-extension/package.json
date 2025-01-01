@@ -15,6 +15,14 @@
     "dist/"
   ],
   "main": "dist/bundle.js",
+  "bin": {
+    "manifest-to-bicep": "dist/bundle.js"
+  },
+  "bundledDependencies": [
+    "bicep-types",
+    "yaml",
+    "yargs"
+  ],
   "dependencies": {
     "bicep-types": "file:../../bicep-types/src/bicep-types",
     "yaml": "^2.6.0",
