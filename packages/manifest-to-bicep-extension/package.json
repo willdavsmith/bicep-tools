@@ -16,7 +16,7 @@
   ],
   "main": "dist/bundle.js",
   "bin": {
-    "manifest-to-bicep": "dist/bundle.js"
+    "manifest-to-bicep": "bin.js"
   },
   "bundledDependencies": [
     "bicep-types",

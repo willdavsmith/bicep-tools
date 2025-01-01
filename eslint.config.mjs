@@ -10,6 +10,7 @@ export default tseslint.config(
       '**/webpack.config.js',
       '**/dist/**',
       '**/bicep-types/**',
+      '**/bin.js',
     ],
   },
   eslint.configs.recommended,
