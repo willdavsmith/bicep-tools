@@ -8,6 +8,7 @@ export default tseslint.config(
       '**/jest.config.js',
       '**/eslint.config.mjs',
       '**/webpack.config.js',
+      '**/nexe.config.js',
       '**/dist/**',
       '**/bicep-types/**',
       '**/bin.js',
