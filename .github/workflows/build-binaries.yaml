@@ -4,6 +4,10 @@ on:
   push:
     tags:
       - 'v*'
+  pull_request:
+    branches:
+      - main
+      - master
 
 jobs:
   build-linux:
@@ -146,6 +150,7 @@ jobs:
   release:
     needs: [build-linux, build-macos, build-windows]
     runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
     permissions:
       contents: write
     steps:
@@ -153,51 +158,44 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: binaries
-      - name: Create checksums
-        run: |
-          cd binaries
-          find . -type f -name "manifest-to-bicep-extension-*" -exec sha256sum {} \; > checksums.txt
-          cat checksums.txt
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Extract version from tag
         run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> "$GITHUB_ENV"
       - name: Create Release
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: ${{ github.ref_name }}
-          name: Release ${{ github.ref_name }}
-          body: |
-            Release ${{ github.ref_name }}
-            
-            ## Installation
-            
-            Download the appropriate binary for your platform:
-            
-            - **Linux (x64)**: `manifest-to-bicep-extension-linux-x64`
-            - **Linux (musl, x64)**: `manifest-to-bicep-extension-linux-musl-x64`
-            - **macOS (x64)**: `manifest-to-bicep-extension-darwin-x64`
-            - **macOS (ARM64)**: `manifest-to-bicep-extension-darwin-arm64`
-            - **Windows (x64)**: `manifest-to-bicep-extension-win-x64.exe`
-            
-            Make the binary executable (Linux/macOS):
-            ```bash
-            chmod +x manifest-to-bicep-extension-*
-            ```
-            
-            ## Usage
-            
-            ```bash
-            ./manifest-to-bicep-extension-* --help
-            ```
-            
-            ## Checksums
-            
-            See `checksums.txt` for SHA256 checksums of all binaries.
-          draft: false
-          prerelease: false
-          files: |
-            binaries/linux-binaries/*
-            binaries/macos-binaries/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Create release notes file
+          cat > release-notes.md << 'EOF'
+          Release ${{ github.ref_name }}
+          
+          ## Installation
+          
+          Download the appropriate binary for your platform:
+          
+          - **Linux (x64)**: `manifest-to-bicep-extension-linux-x64`
+          - **Linux (musl, x64)**: `manifest-to-bicep-extension-linux-musl-x64`
+          - **macOS (x64)**: `manifest-to-bicep-extension-darwin-x64`
+          - **macOS (ARM64)**: `manifest-to-bicep-extension-darwin-arm64`
+          - **Windows (x64)**: `manifest-to-bicep-extension-win-x64.exe`
+          
+          Make the binary executable (Linux/macOS):
+          ```bash
+          chmod +x manifest-to-bicep-extension-*
+          ```
+          
+          ## Usage
+          
+          ```bash
+          ./manifest-to-bicep-extension-* --help
+          ```
+          EOF
+          
+          # Create the release and upload files
+          gh release create "${{ github.ref_name }}" \
+            --title "Release ${{ github.ref_name }}" \
+            --notes-file release-notes.md \
+            binaries/linux-binaries/* \
+            binaries/macos-binaries/* \
             binaries/windows-binaries/*
-            binaries/checksums.txt
