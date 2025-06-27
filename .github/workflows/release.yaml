@@ -1,0 +1,72 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release (e.g. 1.0.0)'
+        required: true
+        type: string
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Enable Corepack
+        run: corepack enable
+      
+      - name: Initialize git submodules
+        run: git submodule update --init --recursive
+      
+      - name: Build bicep-types dependency
+        run: |
+          cd bicep-types/src/bicep-types
+          npm ci
+          npm run build
+          cd ../../../
+      
+      - name: Install dependencies
+        run: yarn install --immutable
+      
+      - name: Update version
+        run: yarn run publish:all ${{ github.event.inputs.version }}
+        env:
+          PUBLISH_ARGS: "--dry-run"
+      
+      - name: Build all packages
+        run: yarn run build:all
+      
+      - name: Run tests
+        run: yarn run test:ci
+      
+      - name: Run linting
+        run: yarn run lint:all
+      
+      - name: Configure git
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+      
+      - name: Commit version changes
+        run: |
+          git add .
+          git commit -m "Release v${{ github.event.inputs.version }}" || echo "No changes to commit"
+      
+      - name: Create and push tag
+        run: |
+          git tag -a "v${{ github.event.inputs.version }}" -m "Release v${{ github.event.inputs.version }}"
+          git push origin "v${{ github.event.inputs.version }}"
+      
+      - name: Push changes
+        run: git push origin HEAD:${{ github.ref_name }}

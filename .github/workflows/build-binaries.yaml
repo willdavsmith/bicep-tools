@@ -1,0 +1,203 @@
+name: Build Binaries
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Enable Corepack
+        run: corepack enable
+      - name: Build bicep-types
+        working-directory: bicep-types/src/bicep-types
+        run: |
+          npm ci 
+          npm run build
+      - name: Install dependencies
+        run: yarn install --no-immutable
+        env:
+          YARN_ENABLE_HARDENED_MODE: 0
+      - name: Build webpack bundle
+        working-directory: packages/manifest-to-bicep-extension
+        run: yarn build
+      - name: Build Linux binaries
+        working-directory: packages/manifest-to-bicep-extension
+        run: |
+          yarn build:binary:linux
+          yarn build:binary:linux-musl
+      - name: Test Linux binary
+        working-directory: packages/manifest-to-bicep-extension
+        run: |
+          chmod +x dist/manifest-to-bicep-extension-linux-x64
+          ./dist/manifest-to-bicep-extension-linux-x64 --help
+          mkdir -p test-output
+          ./dist/manifest-to-bicep-extension-linux-x64 generate test/testdata/postgres.yaml test-output
+          ls -la test-output/
+      - name: Upload Linux binaries
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-binaries
+          path: |
+            packages/manifest-to-bicep-extension/dist/manifest-to-bicep-extension-linux-x64
+            packages/manifest-to-bicep-extension/dist/manifest-to-bicep-extension-linux-musl-x64
+
+  build-macos:
+    runs-on: macos-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Enable Corepack
+        run: corepack enable
+      - name: Build bicep-types
+        working-directory: bicep-types/src/bicep-types
+        run: |
+          npm ci 
+          npm run build
+      - name: Install dependencies
+        run: yarn install --no-immutable
+        env:
+          YARN_ENABLE_HARDENED_MODE: 0
+      - name: Build webpack bundle
+        working-directory: packages/manifest-to-bicep-extension
+        run: yarn build
+      - name: Build macOS binaries
+        working-directory: packages/manifest-to-bicep-extension
+        run: yarn build:binary:macos
+      - name: Test macOS x64 binary
+        working-directory: packages/manifest-to-bicep-extension
+        run: |
+          chmod +x dist/manifest-to-bicep-extension-darwin-x64
+          ./dist/manifest-to-bicep-extension-darwin-x64 --help
+          mkdir -p test-output
+          ./dist/manifest-to-bicep-extension-darwin-x64 generate test/testdata/postgres.yaml test-output
+          ls -la test-output/
+      - name: Upload macOS binaries
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-binaries
+          path: |
+            packages/manifest-to-bicep-extension/dist/manifest-to-bicep-extension-darwin-x64
+            packages/manifest-to-bicep-extension/dist/manifest-to-bicep-extension-darwin-arm64
+
+  build-windows:
+    runs-on: windows-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Enable Corepack
+        run: corepack enable
+      - name: Build bicep-types
+        working-directory: bicep-types/src/bicep-types
+        run: |
+          npm ci 
+          npm run build
+      - name: Install dependencies
+        run: yarn install --no-immutable
+        env:
+          YARN_ENABLE_HARDENED_MODE: 0
+      - name: Build webpack bundle
+        working-directory: packages/manifest-to-bicep-extension
+        run: yarn build
+      - name: Build Windows binary
+        working-directory: packages/manifest-to-bicep-extension
+        run: yarn build:binary:windows
+      - name: Test Windows binary
+        working-directory: packages/manifest-to-bicep-extension
+        run: |
+          ./dist/manifest-to-bicep-extension-win-x64.exe --help
+          New-Item -ItemType Directory -Force -Path test-output
+          ./dist/manifest-to-bicep-extension-win-x64.exe generate test/testdata/postgres.yaml test-output
+          Get-ChildItem test-output
+      - name: Upload Windows binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-binaries
+          path: packages/manifest-to-bicep-extension/dist/manifest-to-bicep-extension-win-x64.exe
+
+  release:
+    needs: [build-linux, build-macos, build-windows]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download all binaries
+        uses: actions/download-artifact@v4
+        with:
+          path: binaries
+      - name: Create checksums
+        run: |
+          cd binaries
+          find . -type f -name "manifest-to-bicep-extension-*" -exec sha256sum {} \; > checksums.txt
+          cat checksums.txt
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Extract version from tag
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> "$GITHUB_ENV"
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: Release ${{ github.ref_name }}
+          body: |
+            Release ${{ github.ref_name }}
+            
+            ## Installation
+            
+            Download the appropriate binary for your platform:
+            
+            - **Linux (x64)**: `manifest-to-bicep-extension-linux-x64`
+            - **Linux (musl, x64)**: `manifest-to-bicep-extension-linux-musl-x64`
+            - **macOS (x64)**: `manifest-to-bicep-extension-darwin-x64`
+            - **macOS (ARM64)**: `manifest-to-bicep-extension-darwin-arm64`
+            - **Windows (x64)**: `manifest-to-bicep-extension-win-x64.exe`
+            
+            Make the binary executable (Linux/macOS):
+            ```bash
+            chmod +x manifest-to-bicep-extension-*
+            ```
+            
+            ## Usage
+            
+            ```bash
+            ./manifest-to-bicep-extension-* --help
+            ```
+            
+            ## Checksums
+            
+            See `checksums.txt` for SHA256 checksums of all binaries.
+          draft: false
+          prerelease: false
+          files: |
+            binaries/linux-binaries/*
+            binaries/macos-binaries/*
+            binaries/windows-binaries/*
+            binaries/checksums.txt
