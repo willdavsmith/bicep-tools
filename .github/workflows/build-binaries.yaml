@@ -34,13 +34,13 @@ jobs:
         run: yarn install --no-immutable
         env:
           YARN_ENABLE_HARDENED_MODE: 0
-      - name: Build webpack bundle
-        run: yarn workspace @radius-project/manifest-to-bicep-extension run build
+      - name: Build all packages
+        run: yarn run build:all
       - name: Build Linux binaries
         working-directory: packages/manifest-to-bicep-extension
         run: |
-          yarn build:binary:linux
-          yarn build:binary:linux-musl
+          yarn run build:binary:linux
+          yarn run build:binary:linux-musl
       - name: Test Linux binary
         working-directory: packages/manifest-to-bicep-extension
         run: |
@@ -81,11 +81,11 @@ jobs:
         run: yarn install --no-immutable
         env:
           YARN_ENABLE_HARDENED_MODE: 0
-      - name: Build webpack bundle
-        run: yarn workspace @radius-project/manifest-to-bicep-extension run build
+      - name: Build all packages
+        run: yarn run build:all
       - name: Build macOS binaries
         working-directory: packages/manifest-to-bicep-extension
-        run: yarn build:binary:macos
+        run: yarn run build:binary:macos
       - name: Test macOS x64 binary
         working-directory: packages/manifest-to-bicep-extension
         run: |
@@ -126,11 +126,11 @@ jobs:
         run: yarn install --no-immutable
         env:
           YARN_ENABLE_HARDENED_MODE: 0
-      - name: Build webpack bundle
-        run: yarn workspace @radius-project/manifest-to-bicep-extension run build
+      - name: Build all packages
+        run: yarn run build:all
       - name: Build Windows binary
         working-directory: packages/manifest-to-bicep-extension
-        run: yarn build:binary:windows
+        run: yarn run build:binary:windows
       - name: Test Windows binary
         working-directory: packages/manifest-to-bicep-extension
         run: |
