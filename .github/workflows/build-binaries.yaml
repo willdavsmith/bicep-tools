@@ -35,8 +35,7 @@ jobs:
         env:
           YARN_ENABLE_HARDENED_MODE: 0
       - name: Build webpack bundle
-        working-directory: packages/manifest-to-bicep-extension
-        run: yarn build
+        run: yarn workspace @radius-project/manifest-to-bicep-extension run build
       - name: Build Linux binaries
         working-directory: packages/manifest-to-bicep-extension
         run: |
@@ -83,8 +82,7 @@ jobs:
         env:
           YARN_ENABLE_HARDENED_MODE: 0
       - name: Build webpack bundle
-        working-directory: packages/manifest-to-bicep-extension
-        run: yarn build
+        run: yarn workspace @radius-project/manifest-to-bicep-extension run build
       - name: Build macOS binaries
         working-directory: packages/manifest-to-bicep-extension
         run: yarn build:binary:macos
@@ -129,8 +127,7 @@ jobs:
         env:
           YARN_ENABLE_HARDENED_MODE: 0
       - name: Build webpack bundle
-        working-directory: packages/manifest-to-bicep-extension
-        run: yarn build
+        run: yarn workspace @radius-project/manifest-to-bicep-extension run build
       - name: Build Windows binary
         working-directory: packages/manifest-to-bicep-extension
         run: yarn build:binary:windows
