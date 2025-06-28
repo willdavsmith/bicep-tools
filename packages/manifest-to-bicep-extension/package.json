@@ -36,8 +36,8 @@
   "scripts": {
     "build": "webpack",
     "build:binary": "yarn build:binary:linux && yarn build:binary:linux-musl && yarn build:binary:macos && yarn build:binary:windows",
-    "build:binary:linux": "nexe dist/bundle.js -t linux-x64-20.18.1 -o dist/manifest-to-bicep-extension-linux-x64",
-    "build:binary:linux-musl": "nexe dist/bundle.js -t alpine-x64-20.18.1 -o dist/manifest-to-bicep-extension-linux-musl-x64",
+    "build:binary:linux": "nexe dist/bundle.js -t linux-x64-20.18.1 -o dist/manifest-to-bicep-extension-linux-x64 --build",
+    "build:binary:linux-musl": "nexe dist/bundle.js -t alpine-x64-20.18.1 -o dist/manifest-to-bicep-extension-linux-musl-x64 --build",
     "build:binary:macos": "yarn build:binary:macos-x64 && yarn build:binary:macos-arm64",
     "build:binary:macos-x64": "nexe dist/bundle.js -t darwin-x64-20.18.1 -o dist/manifest-to-bicep-extension-darwin-x64",
     "build:binary:macos-arm64": "nexe dist/bundle.js -t darwin-arm64-20.18.1 -o dist/manifest-to-bicep-extension-darwin-arm64",
