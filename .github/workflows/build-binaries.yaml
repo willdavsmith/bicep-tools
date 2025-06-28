@@ -36,11 +36,9 @@ jobs:
           YARN_ENABLE_HARDENED_MODE: 0
       - name: Build all packages
         run: yarn run build:all
-      - name: Build Linux binaries
+      - name: Build Linux binary
         working-directory: packages/manifest-to-bicep-extension
-        run: |
-          yarn run build:binary:linux
-          yarn run build:binary:linux-musl
+        run: yarn run build:binary:linux
       - name: Test Linux binary
         working-directory: packages/manifest-to-bicep-extension
         run: |
@@ -49,13 +47,54 @@ jobs:
           mkdir -p test-output
           ./dist/manifest-to-bicep-extension-linux-x64 generate test/testdata/postgres.yaml test-output
           ls -la test-output/
-      - name: Upload Linux binaries
+      - name: Upload Linux binary
         uses: actions/upload-artifact@v4
         with:
           name: linux-binaries
-          path: |
-            packages/manifest-to-bicep-extension/dist/manifest-to-bicep-extension-linux-x64
-            packages/manifest-to-bicep-extension/dist/manifest-to-bicep-extension-linux-musl-x64
+          path: packages/manifest-to-bicep-extension/dist/manifest-to-bicep-extension-linux-x64
+
+  build-linux-musl:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Enable Corepack
+        run: corepack enable
+      - name: Build bicep-types
+        working-directory: bicep-types/src/bicep-types
+        run: |
+          npm ci 
+          npm run build
+      - name: Install dependencies
+        run: yarn install --no-immutable
+        env:
+          YARN_ENABLE_HARDENED_MODE: 0
+      - name: Build all packages
+        run: yarn run build:all
+      - name: Build Linux MUSL binary
+        working-directory: packages/manifest-to-bicep-extension
+        run: yarn run build:binary:linux-musl
+      - name: Test Linux MUSL binary
+        working-directory: packages/manifest-to-bicep-extension
+        run: |
+          chmod +x dist/manifest-to-bicep-extension-linux-musl-x64
+          ./dist/manifest-to-bicep-extension-linux-musl-x64 --help
+          mkdir -p test-output
+          ./dist/manifest-to-bicep-extension-linux-musl-x64 generate test/testdata/postgres.yaml test-output
+          ls -la test-output/
+      - name: Upload Linux MUSL binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-musl-binaries
+          path: packages/manifest-to-bicep-extension/dist/manifest-to-bicep-extension-linux-musl-x64
 
   build-macos:
     runs-on: macos-latest
@@ -145,7 +184,7 @@ jobs:
           path: packages/manifest-to-bicep-extension/dist/manifest-to-bicep-extension-win-x64.exe
 
   release:
-    needs: [build-linux, build-macos, build-windows]
+    needs: [build-linux, build-linux-musl, build-macos, build-windows]
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/v')
     permissions:
@@ -194,5 +233,6 @@ jobs:
             --title "Release ${{ github.ref_name }}" \
             --notes-file release-notes.md \
             binaries/linux-binaries/* \
+            binaries/linux-musl-binaries/* \
             binaries/macos-binaries/* \
             binaries/windows-binaries/*
