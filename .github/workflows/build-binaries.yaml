@@ -38,11 +38,18 @@ jobs:
       - name: Build binary
         working-directory: packages/manifest-to-bicep-extension
         run: yarn run build:binary:linux-x64
+      - name: Verify binary
+        working-directory: packages/manifest-to-bicep-extension
+        run: |
+          echo "Testing binary execution..."
+          ./dist/manifest-to-bicep-extension-linux-x64 --version
+          echo "Binary works correctly!"
       - name: Upload binary
         uses: actions/upload-artifact@v4
         with:
           name: manifest-to-bicep-extension-linux-x64
           path: packages/manifest-to-bicep-extension/dist/manifest-to-bicep-extension-linux-x64
+
   build-linux-musl-amd64:
     runs-on: ubuntu-latest
     container:
@@ -73,12 +80,17 @@ jobs:
       - name: Build binary
         working-directory: packages/manifest-to-bicep-extension
         run: yarn run build:binary:linux-musl-x64
+      - name: Verify binary
+        working-directory: packages/manifest-to-bicep-extension
+        run: |
+          echo "Testing binary execution..."
+          ./dist/manifest-to-bicep-extension-linux-musl-x64 --version
+          echo "Binary works correctly!"
       - name: Upload binary
         uses: actions/upload-artifact@v4
         with:
           name: manifest-to-bicep-extension-linux-musl-x64
           path: packages/manifest-to-bicep-extension/dist/manifest-to-bicep-extension-linux-musl-x64
-
 
   release:
     needs: [build-linux-amd64, build-linux-musl-amd64]
