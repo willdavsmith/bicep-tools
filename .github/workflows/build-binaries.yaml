@@ -37,18 +37,18 @@ jobs:
         run: yarn run build:all
       - name: Build binary
         working-directory: packages/manifest-to-bicep-extension
-        run: yarn run build:binary:linux-x64
+        run: yarn run build:binary:linux-amd64
       - name: Verify binary
         working-directory: packages/manifest-to-bicep-extension
         run: |
           echo "Testing binary execution..."
-          ./dist/manifest-to-bicep-extension-linux-x64 --version
+          ./dist/manifest-to-bicep-extension-linux-amd64 --version
           echo "Binary works correctly!"
       - name: Upload binary
         uses: actions/upload-artifact@v4
         with:
-          name: manifest-to-bicep-extension-linux-x64
-          path: packages/manifest-to-bicep-extension/dist/manifest-to-bicep-extension-linux-x64
+          name: manifest-to-bicep-extension-linux-amd64
+          path: packages/manifest-to-bicep-extension/dist/manifest-to-bicep-extension-linux-amd64
 
   build-linux-musl-amd64:
     runs-on: ubuntu-latest
@@ -79,22 +79,179 @@ jobs:
         run: yarn run build:all
       - name: Build binary
         working-directory: packages/manifest-to-bicep-extension
-        run: yarn run build:binary:linux-musl-x64
+        run: yarn run build:binary:linux-musl-amd64
       - name: Verify binary
         working-directory: packages/manifest-to-bicep-extension
         run: |
           echo "Testing binary execution..."
-          ./dist/manifest-to-bicep-extension-linux-musl-x64 --version
+          ./dist/manifest-to-bicep-extension-linux-musl-amd64 --version
           echo "Binary works correctly!"
       - name: Upload binary
         uses: actions/upload-artifact@v4
         with:
-          name: manifest-to-bicep-extension-linux-musl-x64
-          path: packages/manifest-to-bicep-extension/dist/manifest-to-bicep-extension-linux-musl-x64
+          name: manifest-to-bicep-extension-linux-musl-amd64
+          path: packages/manifest-to-bicep-extension/dist/manifest-to-bicep-extension-linux-musl-amd64
+
+  build-linux-arm64:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Enable Corepack
+        run: corepack enable
+      - name: Build bicep-types
+        working-directory: bicep-types/src/bicep-types
+        run: |
+          npm ci 
+          npm run build
+      - name: Install dependencies
+        run: yarn install --no-immutable
+        env:
+          YARN_ENABLE_HARDENED_MODE: 0
+      - name: Build all packages
+        run: yarn run build:all
+      - name: Build binary
+        working-directory: packages/manifest-to-bicep-extension
+        run: yarn run build:binary:linux-arm64
+      - name: Upload binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: manifest-to-bicep-extension-linux-arm64
+          path: packages/manifest-to-bicep-extension/dist/manifest-to-bicep-extension-linux-arm64
+
+  build-darwin-amd64:
+    runs-on: macos-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Enable Corepack
+        run: corepack enable
+      - name: Build bicep-types
+        working-directory: bicep-types/src/bicep-types
+        run: |
+          npm ci 
+          npm run build
+      - name: Install dependencies
+        run: yarn install --no-immutable
+        env:
+          YARN_ENABLE_HARDENED_MODE: 0
+      - name: Build all packages
+        run: yarn run build:all
+      - name: Build binary
+        working-directory: packages/manifest-to-bicep-extension
+        run: yarn run build:binary:darwin-amd64
+      - name: Verify binary
+        working-directory: packages/manifest-to-bicep-extension
+        run: |
+          echo "Testing binary execution..."
+          ./dist/manifest-to-bicep-extension-darwin-amd64 --version
+          echo "Binary works correctly!"
+      - name: Upload binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: manifest-to-bicep-extension-darwin-amd64
+          path: packages/manifest-to-bicep-extension/dist/manifest-to-bicep-extension-darwin-amd64
+
+  build-darwin-arm64:
+    runs-on: macos-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Enable Corepack
+        run: corepack enable
+      - name: Build bicep-types
+        working-directory: bicep-types/src/bicep-types
+        run: |
+          npm ci 
+          npm run build
+      - name: Install dependencies
+        run: yarn install --no-immutable
+        env:
+          YARN_ENABLE_HARDENED_MODE: 0
+      - name: Build all packages
+        run: yarn run build:all
+      - name: Build binary
+        working-directory: packages/manifest-to-bicep-extension
+        run: yarn run build:binary:darwin-arm64
+      - name: Verify binary
+        working-directory: packages/manifest-to-bicep-extension
+        run: |
+          echo "Testing binary execution..."
+          ./dist/manifest-to-bicep-extension-darwin-arm64 --version
+          echo "Binary works correctly!"
+      - name: Upload binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: manifest-to-bicep-extension-darwin-arm64
+          path: packages/manifest-to-bicep-extension/dist/manifest-to-bicep-extension-darwin-arm64
+
+  build-windows-amd64:
+    runs-on: windows-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Enable Corepack
+        run: corepack enable
+      - name: Build bicep-types
+        working-directory: bicep-types/src/bicep-types
+        run: |
+          npm ci 
+          npm run build
+      - name: Install dependencies
+        run: yarn install --no-immutable
+        env:
+          YARN_ENABLE_HARDENED_MODE: 0
+      - name: Build all packages
+        run: yarn run build:all
+      - name: Build binary
+        working-directory: packages/manifest-to-bicep-extension
+        run: yarn run build:binary:win-amd64
+      - name: Verify binary
+        working-directory: packages/manifest-to-bicep-extension
+        run: |
+          echo "Testing binary execution..."
+          ./dist/manifest-to-bicep-extension-win-amd64.exe --version
+          echo "Binary works correctly!"
+      - name: Upload binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: manifest-to-bicep-extension-win-amd64
+          path: packages/manifest-to-bicep-extension/dist/manifest-to-bicep-extension-win-amd64.exe
 
   release:
-    needs: [build-linux-amd64, build-linux-musl-amd64]
-    # needs: [build-linux-amd64, build-linux-musl-amd64, build-linux-arm64, build-darwin-amd64, build-darwin-arm64, build-windows-amd64]
+    needs: [build-linux-amd64, build-linux-musl-amd64, build-linux-arm64, build-darwin-amd64, build-darwin-arm64, build-windows-amd64]
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/v')
     permissions:

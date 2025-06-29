@@ -10,19 +10,31 @@ const PLATFORMS = {
   'linux-x64': {
     nodeUrl: 'https://nodejs.org/dist/v20.11.0/node-v20.11.0-linux-x64.tar.xz',
     nodeBinary: 'node-v20.11.0-linux-x64/bin/node',
-    outputName: 'manifest-to-bicep-extension-linux-x64',
+    outputName: 'manifest-to-bicep-extension-linux-amd64',
     postjectArgs: ['NODE_SEA_BLOB', 'sea-prep.blob', '--sentinel-fuse', 'NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2']
   },
   'linux-musl-x64': {
     nodeUrl: 'https://unofficial-builds.nodejs.org/download/release/v20.11.0/node-v20.11.0-linux-x64-musl.tar.xz',
     nodeBinary: 'node-v20.11.0-linux-x64-musl/bin/node',
-    outputName: 'manifest-to-bicep-extension-linux-musl-x64',
+    outputName: 'manifest-to-bicep-extension-linux-musl-amd64',
     postjectArgs: ['NODE_SEA_BLOB', 'sea-prep.blob', '--sentinel-fuse', 'NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2']
   },
   'darwin-x64': {
     nodeUrl: 'https://nodejs.org/dist/v20.11.0/node-v20.11.0-darwin-x64.tar.gz',
     nodeBinary: 'node-v20.11.0-darwin-x64/bin/node',
     outputName: 'manifest-to-bicep-extension-darwin-x64',
+    postjectArgs: ['NODE_SEA_BLOB', 'sea-prep.blob', '--sentinel-fuse', 'NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2', '--macho-segment-name', 'NODE_SEA']
+  },
+  'linux-arm64': {
+    nodeUrl: 'https://nodejs.org/dist/v20.11.0/node-v20.11.0-linux-arm64.tar.xz',
+    nodeBinary: 'node-v20.11.0-linux-arm64/bin/node',
+    outputName: 'manifest-to-bicep-extension-linux-arm64',
+    postjectArgs: ['NODE_SEA_BLOB', 'sea-prep.blob', '--sentinel-fuse', 'NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2']
+  },
+  'darwin-x64': {
+    nodeUrl: 'https://nodejs.org/dist/v20.11.0/node-v20.11.0-darwin-x64.tar.gz',
+    nodeBinary: 'node-v20.11.0-darwin-x64/bin/node',
+    outputName: 'manifest-to-bicep-extension-darwin-amd64',
     postjectArgs: ['NODE_SEA_BLOB', 'sea-prep.blob', '--sentinel-fuse', 'NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2', '--macho-segment-name', 'NODE_SEA']
   },
   'darwin-arm64': {
@@ -34,7 +46,7 @@ const PLATFORMS = {
   'win32-x64': {
     nodeUrl: 'https://nodejs.org/dist/v20.11.0/node-v20.11.0-win-x64.zip',
     nodeBinary: 'node-v20.11.0-win-x64/node.exe',
-    outputName: 'manifest-to-bicep-extension-win-x64.exe',
+    outputName: 'manifest-to-bicep-extension-win-amd64.exe',
     postjectArgs: ['NODE_SEA_BLOB', 'sea-prep.blob', '--sentinel-fuse', 'NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2']
   }
 };

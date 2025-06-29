@@ -12,6 +12,7 @@ export default tseslint.config(
       '**/dist/**',
       '**/bicep-types/**',
       '**/bin.js',
+      '**/scripts/**',
     ],
   },
   eslint.configs.recommended,
