@@ -11,6 +11,9 @@
     "provenance": true
   },
   "packageManager": "yarn@4.5.2",
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "files": [
     "dist/"
   ],
@@ -31,17 +34,19 @@
   "devDependencies": {
     "@types/node": "^22.7.5",
     "@types/yargs": "^17.0.33",
-    "nexe": "^4.0.0-rc.7"
+    "postject": "^1.0.0-alpha.6"
   },
   "scripts": {
     "build": "webpack",
-    "build:binary": "nexe dist/bundle.js --config nexe.config.js",
-    "build:binary:linux": "nexe dist/bundle.js -t linux-x64-20.18.1 -o dist/manifest-to-bicep-extension-linux-x64",
-    "build:binary:linux-musl": "nexe dist/bundle.js -t alpine-x64-20.18.1 -o dist/manifest-to-bicep-extension-linux-musl-x64",
-    "build:binary:macos": "yarn build:binary:macos-x64 && yarn build:binary:macos-arm64",
-    "build:binary:macos-x64": "nexe dist/bundle.js -t darwin-x64-20.18.1 -o dist/manifest-to-bicep-extension-darwin-x64",
-    "build:binary:macos-arm64": "nexe dist/bundle.js -t darwin-arm64-20.18.1 -o dist/manifest-to-bicep-extension-darwin-arm64",
-    "build:binary:windows": "nexe dist/bundle.js -t windows-x64-20.18.1 -o dist/manifest-to-bicep-extension-win-x64.exe",
+    "build:sea-blob": "node --experimental-sea-config sea-config.json",
+    "build:binary": "yarn build:sea-blob && yarn build:binary:current-platform",
+    "build:binary:current-platform": "node scripts/build-sea.js",
+    "build:binary:all": "yarn build:binary:linux && yarn build:binary:macos && yarn build:binary:windows",
+    "build:binary:linux-x64": "yarn build:sea-blob && node scripts/build-sea.js linux-x64",
+    "build:binary:linux-musl-x64": "yarn build:sea-blob && node scripts/build-sea.js linux-musl-x64",
+    "build:binary:macos-arm64": "yarn build:binary:macos-x64 && yarn build:binary:macos-arm64",
+    "build:binary:macos-x64": "yarn build:sea-blob && node scripts/build-sea.js darwin-x64",
+    "build:binary:windows": "yarn build:sea-blob && node scripts/build-sea.js win32-x64",
     "publish": "npm publish",
     "prepublishOnly": "yarn build",
     "version": "npm pkg set version=${0}"

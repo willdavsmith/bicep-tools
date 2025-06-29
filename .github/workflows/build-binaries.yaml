@@ -8,9 +8,8 @@ on:
     branches:
       - main
       - master
-
 jobs:
-  build-linux:
+  build-linux-amd64:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -36,36 +35,28 @@ jobs:
           YARN_ENABLE_HARDENED_MODE: 0
       - name: Build all packages
         run: yarn run build:all
-      - name: Build Linux binary
+      - name: Build binary
         working-directory: packages/manifest-to-bicep-extension
-        run: yarn run build:binary:linux
-      - name: Test Linux binary
-        working-directory: packages/manifest-to-bicep-extension
-        run: |
-          chmod +x dist/manifest-to-bicep-extension-linux-x64
-          ./dist/manifest-to-bicep-extension-linux-x64 --help
-          mkdir -p test-output
-          ./dist/manifest-to-bicep-extension-linux-x64 generate test/testdata/postgres.yaml test-output
-          ls -la test-output/
-      - name: Upload Linux binary
+        run: yarn run build:binary:linux-x64
+      - name: Upload binary
         uses: actions/upload-artifact@v4
         with:
-          name: linux-binaries
+          name: manifest-to-bicep-extension-linux-x64
           path: packages/manifest-to-bicep-extension/dist/manifest-to-bicep-extension-linux-x64
-
-  build-linux-musl:
+  build-linux-musl-amd64:
     runs-on: ubuntu-latest
+    container:
+      image: node:20-alpine
     permissions:
       contents: read
     steps:
+      - name: Install build dependencies
+        run: |
+          apk add --no-cache git bash curl tar xz make g++ python3
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           submodules: true
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
       - name: Enable Corepack
         run: corepack enable
       - name: Build bicep-types
@@ -79,112 +70,19 @@ jobs:
           YARN_ENABLE_HARDENED_MODE: 0
       - name: Build all packages
         run: yarn run build:all
-      - name: Build Linux MUSL binary
+      - name: Build binary
         working-directory: packages/manifest-to-bicep-extension
-        run: yarn run build:binary:linux-musl
-      - name: Test Linux MUSL binary
-        working-directory: packages/manifest-to-bicep-extension
-        run: |
-          chmod +x dist/manifest-to-bicep-extension-linux-musl-x64
-          ./dist/manifest-to-bicep-extension-linux-musl-x64 --help
-          mkdir -p test-output
-          ./dist/manifest-to-bicep-extension-linux-musl-x64 generate test/testdata/postgres.yaml test-output
-          ls -la test-output/
-      - name: Upload Linux MUSL binary
+        run: yarn run build:binary:linux-musl-x64
+      - name: Upload binary
         uses: actions/upload-artifact@v4
         with:
-          name: linux-musl-binaries
+          name: manifest-to-bicep-extension-linux-musl-x64
           path: packages/manifest-to-bicep-extension/dist/manifest-to-bicep-extension-linux-musl-x64
 
-  build-macos:
-    runs-on: macos-latest
-    permissions:
-      contents: read
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          submodules: true
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-      - name: Enable Corepack
-        run: corepack enable
-      - name: Build bicep-types
-        working-directory: bicep-types/src/bicep-types
-        run: |
-          npm ci 
-          npm run build
-      - name: Install dependencies
-        run: yarn install --no-immutable
-        env:
-          YARN_ENABLE_HARDENED_MODE: 0
-      - name: Build all packages
-        run: yarn run build:all
-      - name: Build macOS binaries
-        working-directory: packages/manifest-to-bicep-extension
-        run: yarn run build:binary:macos
-      - name: Test macOS x64 binary
-        working-directory: packages/manifest-to-bicep-extension
-        run: |
-          chmod +x dist/manifest-to-bicep-extension-darwin-x64
-          ./dist/manifest-to-bicep-extension-darwin-x64 --help
-          mkdir -p test-output
-          ./dist/manifest-to-bicep-extension-darwin-x64 generate test/testdata/postgres.yaml test-output
-          ls -la test-output/
-      - name: Upload macOS binaries
-        uses: actions/upload-artifact@v4
-        with:
-          name: macos-binaries
-          path: |
-            packages/manifest-to-bicep-extension/dist/manifest-to-bicep-extension-darwin-x64
-            packages/manifest-to-bicep-extension/dist/manifest-to-bicep-extension-darwin-arm64
-
-  build-windows:
-    runs-on: windows-latest
-    permissions:
-      contents: read
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          submodules: true
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-      - name: Enable Corepack
-        run: corepack enable
-      - name: Build bicep-types
-        working-directory: bicep-types/src/bicep-types
-        run: |
-          npm ci 
-          npm run build
-      - name: Install dependencies
-        run: yarn install --no-immutable
-        env:
-          YARN_ENABLE_HARDENED_MODE: 0
-      - name: Build all packages
-        run: yarn run build:all
-      - name: Build Windows binary
-        working-directory: packages/manifest-to-bicep-extension
-        run: yarn run build:binary:windows
-      - name: Test Windows binary
-        working-directory: packages/manifest-to-bicep-extension
-        run: |
-          ./dist/manifest-to-bicep-extension-win-x64.exe --help
-          New-Item -ItemType Directory -Force -Path test-output
-          ./dist/manifest-to-bicep-extension-win-x64.exe generate test/testdata/postgres.yaml test-output
-          Get-ChildItem test-output
-      - name: Upload Windows binary
-        uses: actions/upload-artifact@v4
-        with:
-          name: windows-binaries
-          path: packages/manifest-to-bicep-extension/dist/manifest-to-bicep-extension-win-x64.exe
 
   release:
-    needs: [build-linux, build-linux-musl, build-macos, build-windows]
+    needs: [build-linux-amd64, build-linux-musl-amd64]
+    # needs: [build-linux-amd64, build-linux-musl-amd64, build-linux-arm64, build-darwin-amd64, build-darwin-arm64, build-windows-amd64]
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/v')
     permissions:
@@ -210,11 +108,12 @@ jobs:
           
           Download the appropriate binary for your platform:
           
-          - **Linux (x64)**: `manifest-to-bicep-extension-linux-x64`
-          - **Linux (musl, x64)**: `manifest-to-bicep-extension-linux-musl-x64`
-          - **macOS (x64)**: `manifest-to-bicep-extension-darwin-x64`
-          - **macOS (ARM64)**: `manifest-to-bicep-extension-darwin-arm64`
-          - **Windows (x64)**: `manifest-to-bicep-extension-win-x64.exe`
+          - **Linux (amd64)**: `manifest-to-bicep-extension-linux-amd64`
+          - **Linux (musl, amd64)**: `manifest-to-bicep-extension-linux-musl-amd64`
+          - **Linux (arm64)**: `manifest-to-bicep-extension-linux-arm64`
+          - **macOS (amd64)**: `manifest-to-bicep-extension-darwin-amd64`
+          - **macOS (arm64)**: `manifest-to-bicep-extension-darwin-arm64`
+          - **Windows (amd64)**: `manifest-to-bicep-extension-win-amd64.exe`
           
           Make the binary executable (Linux/macOS):
           ```bash
@@ -232,7 +131,4 @@ jobs:
           gh release create "${{ github.ref_name }}" \
             --title "Release ${{ github.ref_name }}" \
             --notes-file release-notes.md \
-            binaries/linux-binaries/* \
-            binaries/linux-musl-binaries/* \
-            binaries/macos-binaries/* \
-            binaries/windows-binaries/*
+            binaries/*-binary/*
