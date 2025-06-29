@@ -2,12 +2,17 @@ name: Build Binaries
 
 on:
   push:
+    branches:
+      - main
+      - features/*
+      - release/*
     tags:
       - 'v*'
   pull_request:
     branches:
       - main
-      - master
+      - features/*
+      - release/*
 jobs:
   build-linux-amd64:
     runs-on: ubuntu-latest
