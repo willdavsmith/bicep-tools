@@ -4,6 +4,33 @@ This repo contains the tooling for Bicep support for Radius types. The tools in 
 
 - Generate a Bicep Extension from a Radius type manifest.
 
+## Installation
+
+### Using NPM (requires Node.js)
+
+```bash
+npx @radius-project/manifest-to-bicep-extension@alpha generate <manifest> <output>
+```
+
+### Using Standalone Binary (no Node.js required)
+
+Download the appropriate binary for your platform from the [releases page](https://github.com/radius-project/bicep-tools/releases):
+
+- Linux: `manifest-to-bicep-extension-linux-x64`
+- Linux (musl): `manifest-to-bicep-extension-linux-musl-x64`
+- macOS (Intel): `manifest-to-bicep-extension-darwin-x64`
+- macOS (Apple Silicon): `manifest-to-bicep-extension-darwin-arm64`
+- Windows: `manifest-to-bicep-extension-win-x64.exe`
+
+```bash
+# Linux/macOS
+chmod +x manifest-to-bicep-extension-*
+./manifest-to-bicep-extension-<platform> generate <manifest> <output>
+
+# Windows
+manifest-to-bicep-extension-win-x64.exe generate <manifest> <output>
+```
+
 ## Summary
 
 Browse our guides for how to [understand the code](./docs/contributing/contributing-code/contributing-code-organization/)
