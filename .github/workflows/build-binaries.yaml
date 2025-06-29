@@ -262,18 +262,21 @@ jobs:
     permissions:
       contents: write
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
       - name: Download all binaries
         uses: actions/download-artifact@v4
         with:
           path: binaries
-      - name: Checkout repository
-        uses: actions/checkout@v4
-      - name: Extract version from tag
-        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> "$GITHUB_ENV"
       - name: Create Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          # Generate SHA256 checksums
+          cd binaries
+          find . -name "manifest-to-bicep-extension-*" -type f -exec sha256sum {} \; | sed 's|^\./||' > ../SHASUMS256.txt
+          cd ..
+          
           # Create release notes file
           cat > release-notes.md << 'EOF'
           Release ${{ github.ref_name }}
@@ -294,6 +297,14 @@ jobs:
           chmod +x manifest-to-bicep-extension-*
           ```
           
+          ## Verification
+          
+          Verify the integrity of downloaded binaries using SHA256 checksums:
+          ```bash
+          # Download SHASUMS256.txt and verify
+          sha256sum -c SHASUMS256.txt
+          ```
+          
           ## Usage
           
           ```bash
@@ -305,4 +316,5 @@ jobs:
           gh release create "${{ github.ref_name }}" \
             --title "Release ${{ github.ref_name }}" \
             --notes-file release-notes.md \
-            binaries/*-binary/*
+            binaries/manifest-to-bicep-extension-*/manifest-to-bicep-extension-* \
+            SHASUMS256.txt
